@@ -6,6 +6,7 @@ Small Vite-based web app for generating and reading QR codes (QRIS-focused) to h
 - Vite (Vanilla JS)
 - `qrcode` for QR generation
 - `jsqr` for QR scanning/decoding
+- Static-to-dynamic QRIS API from [Rachmad42/qris-static-to-dynamic-api](https://github.com/Rachmad42/qris-static-to-dynamic-api)
 
 ## Requirements
 - Node.js (LTS recommended)
