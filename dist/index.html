@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>QRIS Dynamic Studio</title>
+    <script type="module" crossorigin src="./assets/index-BUlifZxa.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-n5qW8RfO.css">
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="workspace" aria-label="QRIS dynamic generator">
+        <div class="panel controls-panel">
+          <div class="brand-row">
+            <div class="brand-mark">QR</div>
+            <div>
+              <p class="eyebrow">Dynamic QRIS</p>
+              <h1>Payment Poster Studio</h1>
+            </div>
+          </div>
+
+          <div class="tabs" role="tablist" aria-label="Input source">
+            <button class="tab-button active" id="photoTab" type="button">
+              Upload Photo
+            </button>
+            <button class="tab-button" id="textTab" type="button">
+              Paste Text
+            </button>
+          </div>
+
+          <div class="input-mode active" id="photoMode">
+            <label class="drop-zone" id="dropZone" for="qrisImage">
+              <input id="qrisImage" type="file" accept="image/*" />
+              <span class="drop-icon">+</span>
+              <span>
+                <strong>Upload or drop QRIS photo</strong>
+                <small>PNG, JPG, or screenshot</small>
+              </span>
+            </label>
+          </div>
+
+          <div class="input-mode" id="textMode">
+            <label class="field">
+              <span>QRIS Payload</span>
+              <textarea
+                id="qrisText"
+                rows="7"
+                placeholder="Paste static QRIS string here"
+              ></textarea>
+            </label>
+          </div>
+
+          <div class="field-grid">
+            <label class="field">
+              <span>Merchant Name</span>
+              <input id="merchantName" type="text" placeholder="RD STORE.ONLINE" />
+              <small id="merchantWarning" class="field-warning" hidden>
+                Mengubah Merchant Name hanya mengubah poster, bukan data QRIS pembayaran.
+              </small>
+            </label>
+            <label class="field">
+              <span>NMID</span>
+              <input id="nmid" type="text" placeholder="ID1021063999994" />
+            </label>
+            <label class="field">
+              <span>Amount</span>
+              <input id="amount" type="number" min="1" step="1" value="15000" />
+            </label>
+          </div>
+
+          <div class="status-bar">
+            <span id="statusDot" class="status-dot"></span>
+            <span id="statusText">Waiting for QRIS input</span>
+          </div>
+
+          <button id="downloadButton" class="primary-button" type="button">
+            Download Poster
+          </button>
+        </div>
+
+        <div class="preview-column">
+          <div class="preview-toolbar">
+            <div>
+              <p class="eyebrow">Live Preview</p>
+              <h2>Generated QRIS Poster</h2>
+            </div>
+            <span id="amountBadge" class="amount-badge">Rp 15.000</span>
+          </div>
+          <div class="poster-frame">
+            <canvas
+              id="posterCanvas"
+              width="1055"
+              height="1491"
+              aria-label="Generated QRIS poster preview"
+            ></canvas>
+          </div>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>
