@@ -17,6 +17,11 @@ const state = {
 
 const API_BASE_URL = window.QRIS_API_BASE_URL || "https://qris-static-to-dynamic-api.netid-id01.workers.dev";
 const STORAGE_KEY = "qris-dynamic-studio:last-data";
+const THEME_STORAGE_KEY = "qris-dynamic-studio:theme";
+const THEME_OPTIONS = ["system", "light", "dark"];
+const THEME_CLOSE_DELAY = 320;
+const systemThemeQuery = window.matchMedia("(prefers-color-scheme: dark)");
+let themeCloseTimeoutId;
 
 const els = {
   amount: document.querySelector("#amount"),
@@ -35,6 +40,11 @@ const els = {
   statusText: document.querySelector("#statusText"),
   textMode: document.querySelector("#textMode"),
   textTab: document.querySelector("#textTab"),
+  themeMenu: document.querySelector("#themeMenu"),
+  themeOptions: document.querySelectorAll("[data-theme-option]"),
+  themeSwitcher: document.querySelector("#themeSwitcher"),
+  themeToggle: document.querySelector("#themeToggle"),
+  themeToggleIcon: document.querySelector("#themeToggleIcon"),
 };
 
 const ctx = els.canvas.getContext("2d");
@@ -46,6 +56,80 @@ const QR_BOX = {
   size: 540,
 };
 const templateImagePromise = loadImage(qrisTemplateUrl);
+
+function getSavedTheme() {
+  try {
+    const savedTheme = localStorage.getItem(THEME_STORAGE_KEY);
+    return THEME_OPTIONS.includes(savedTheme) ? savedTheme : "system";
+  } catch {
+    return "system";
+  }
+}
+
+function getResolvedTheme(themeChoice) {
+  if (themeChoice === "system") {
+    return systemThemeQuery.matches ? "dark" : "light";
+  }
+
+  return themeChoice;
+}
+
+function getThemeIcon(themeChoice) {
+  if (themeChoice === "light") {
+    return `<svg viewBox="0 0 24 24" width="19" height="19" fill="none" aria-hidden="true">
+      <circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="2" />
+      <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+    </svg>`;
+  }
+
+  if (themeChoice === "dark") {
+    return `<svg viewBox="0 0 24 24" width="19" height="19" fill="none" aria-hidden="true">
+      <path d="M21 14.5A8.5 8.5 0 0 1 9.5 3a7 7 0 1 0 11.5 11.5Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round" />
+    </svg>`;
+  }
+
+  return `<svg viewBox="0 0 24 24" width="19" height="19" fill="none" aria-hidden="true">
+    <path d="M4 5h16v10H4V5Z" stroke="currentColor" stroke-width="2" />
+    <path d="M9 19h6" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+    <path d="M12 15v4" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+  </svg>`;
+}
+
+function applyTheme(themeChoice) {
+  const normalizedTheme = THEME_OPTIONS.includes(themeChoice) ? themeChoice : "system";
+  const resolvedTheme = getResolvedTheme(normalizedTheme);
+
+  document.documentElement.dataset.theme = resolvedTheme;
+  document.documentElement.dataset.themeChoice = normalizedTheme;
+  els.themeToggleIcon.innerHTML = getThemeIcon(normalizedTheme);
+  els.themeOptions.forEach((button) => {
+    const isSelected = button.dataset.themeOption === normalizedTheme;
+    button.setAttribute("aria-checked", String(isSelected));
+  });
+}
+
+function setTheme(themeChoice) {
+  applyTheme(themeChoice);
+
+  try {
+    localStorage.setItem(THEME_STORAGE_KEY, themeChoice);
+  } catch {
+    // Some browser privacy modes can disable localStorage.
+  }
+}
+
+function setThemeMenuOpen(isOpen) {
+  window.clearTimeout(themeCloseTimeoutId);
+  els.themeSwitcher.dataset.open = String(isOpen);
+  els.themeToggle.setAttribute("aria-expanded", String(isOpen));
+}
+
+function scheduleThemeMenuClose() {
+  window.clearTimeout(themeCloseTimeoutId);
+  themeCloseTimeoutId = window.setTimeout(() => {
+    setThemeMenuOpen(false);
+  }, THEME_CLOSE_DELAY);
+}
 
 function setStatus(message, tone = "idle") {
   els.statusText.textContent = message;
@@ -492,6 +576,51 @@ function setInputMode(mode) {
 els.photoTab.addEventListener("click", () => setInputMode("photo"));
 els.textTab.addEventListener("click", () => setInputMode("text"));
 
+els.themeToggle.addEventListener("click", () => {
+  setThemeMenuOpen(els.themeSwitcher.dataset.open !== "true");
+});
+
+els.themeSwitcher.addEventListener("mouseenter", () => {
+  setThemeMenuOpen(true);
+});
+
+els.themeSwitcher.addEventListener("mouseleave", scheduleThemeMenuClose);
+
+els.themeSwitcher.addEventListener("focusin", () => {
+  setThemeMenuOpen(true);
+});
+
+els.themeSwitcher.addEventListener("focusout", () => {
+  scheduleThemeMenuClose();
+});
+
+els.themeOptions.forEach((button) => {
+  button.addEventListener("click", () => {
+    setTheme(button.dataset.themeOption);
+    setThemeMenuOpen(false);
+    els.themeToggle.focus();
+  });
+});
+
+document.addEventListener("click", (event) => {
+  if (!els.themeSwitcher.contains(event.target)) {
+    scheduleThemeMenuClose();
+  }
+});
+
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") {
+    scheduleThemeMenuClose();
+    els.themeToggle.focus();
+  }
+});
+
+systemThemeQuery.addEventListener("change", () => {
+  if (getSavedTheme() === "system") {
+    applyTheme("system");
+  }
+});
+
 els.qrisImage.addEventListener("change", async () => {
   const [file] = els.qrisImage.files;
 
@@ -557,5 +686,6 @@ els.downloadButton.addEventListener("click", () => {
   link.click();
 });
 
+applyTheme(getSavedTheme());
 restoreLastData();
 updateDynamicQris();

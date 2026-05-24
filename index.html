@@ -4,9 +4,69 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>QRIS Dynamic Studio</title>
+    <script>
+      (() => {
+        let savedTheme = "system";
+
+        try {
+          savedTheme = localStorage.getItem("qris-dynamic-studio:theme") || "system";
+        } catch {
+          savedTheme = "system";
+        }
+
+        const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches
+          ? "dark"
+          : "light";
+        document.documentElement.dataset.theme =
+          savedTheme === "system" ? systemTheme : savedTheme;
+        document.documentElement.dataset.themeChoice = savedTheme;
+      })();
+    </script>
   </head>
   <body>
     <main class="app-shell">
+      <div class="theme-switcher" id="themeSwitcher">
+        <button
+          class="theme-toggle"
+          id="themeToggle"
+          type="button"
+          aria-label="Choose theme"
+          aria-expanded="false"
+          aria-controls="themeMenu"
+        >
+          <span class="theme-toggle-icon" id="themeToggleIcon" aria-hidden="true"></span>
+        </button>
+        <div class="theme-menu" id="themeMenu" role="menu" aria-label="Theme options">
+          <button class="theme-option" type="button" role="menuitemradio" data-theme-option="system">
+            <span class="theme-option-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none">
+                <path d="M4 5h16v10H4V5Z" stroke="currentColor" stroke-width="2" />
+                <path d="M9 19h6" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                <path d="M12 15v4" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+              </svg>
+            </span>
+            <span>System</span>
+          </button>
+          <button class="theme-option" type="button" role="menuitemradio" data-theme-option="light">
+            <span class="theme-option-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none">
+                <circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="2" />
+                <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+              </svg>
+            </span>
+            <span>Light</span>
+          </button>
+          <button class="theme-option" type="button" role="menuitemradio" data-theme-option="dark">
+            <span class="theme-option-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none">
+                <path d="M21 14.5A8.5 8.5 0 0 1 9.5 3a7 7 0 1 0 11.5 11.5Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round" />
+              </svg>
+            </span>
+            <span>Dark</span>
+          </button>
+        </div>
+      </div>
+
       <section class="workspace" aria-label="QRIS dynamic generator">
         <div class="panel controls-panel">
           <div class="brand-row">
